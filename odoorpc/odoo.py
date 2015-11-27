@@ -424,14 +424,9 @@ class ODOO(object):
         """
         self._check_logged_user()
         # Execute the query
-        args_to_send = [self.env.db, self.env.uid, self._password,
-                        model, method]
-        args_to_send.extend(args)
         data = self.json(
-            '/jsonrpc',
-            {'service': 'object',
-             'method': 'execute',
-             'args': args_to_send})
+            '/web/dataset/call',
+            {'model': model, 'method': method, 'args': args})
         return data.get('result')
 
     def execute_kw(self, model, method, args=None, kwargs=None):
@@ -473,14 +468,9 @@ class ODOO(object):
         # Execute the query
         args = args or []
         kwargs = kwargs or {}
-        args_to_send = [self.env.db, self.env.uid, self._password,
-                        model, method]
-        args_to_send.extend([args, kwargs])
         data = self.json(
-            '/jsonrpc',
-            {'service': 'object',
-             'method': 'execute_kw',
-             'args': args_to_send})
+            '/web/dataset/call_kw',
+            {'model': model, 'method': method, 'args': args, 'kwargs': kwargs})
         return data.get('result')
 
     def exec_workflow(self, model, record_id, signal):
@@ -504,13 +494,9 @@ class ODOO(object):
                 u"Workflows have been removed in Odoo >= 11.0")
         self._check_logged_user()
         # Execute the workflow query
-        args_to_send = [self.env.db, self.env.uid, self._password,
-                        model, signal, record_id]
         data = self.json(
-            '/jsonrpc',
-            {'service': 'object',
-             'method': 'exec_workflow',
-             'args': args_to_send})
+            '/web/dataset/exec_workflow',
+            {'model': model, 'id': record_id, 'signal': signal})
         return data.get('result')
 
     # ---------------------- #

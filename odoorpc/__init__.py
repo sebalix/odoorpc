@@ -30,9 +30,9 @@ __email__ = 'sebastien.alix@osiell.com'
 __licence__ = 'LGPL v3'
 __version__ = '0.6.0'
 
-__all__ = ['ODOO', 'error']
+__all__ = ['ODOO', 'error', 'shell']
 
 from odoorpc.odoo import ODOO
-from odoorpc import error
+from odoorpc import error, shell
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

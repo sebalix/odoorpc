@@ -50,6 +50,11 @@ setup(name=name,
       download_url=download_url,
       packages=['odoorpc',
                 'odoorpc.rpc'],
+      entry_points={
+          'console_scripts': [
+              'odoorpc = odoorpc.shell:main',
+          ],
+      },
       license=license,
       cmdclass=cmdclass,
       command_options=command_options,

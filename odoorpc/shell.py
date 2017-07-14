@@ -10,6 +10,7 @@ class Shell(code.InteractiveConsole):
     def __init__(self, *args, **kwargs):
         code.InteractiveConsole.__init__(self, *args, **kwargs)
         self.set_locals()
+        self.set_readline()
 
     def set_locals(self):
         """Define locals , i.e. objects directly available
@@ -20,6 +21,20 @@ class Shell(code.InteractiveConsole):
             'ODOO': odoorpc.ODOO,
             # 'odoo': odoorpc.ODOO(),   # TODO
         }
+
+    def set_readline(self):
+        """Configure the behaviour of the interactive shell
+        (history, completion...).
+        """
+        try:
+            import readline
+        except ImportError:
+            print("Module readline not available.")
+        else:
+            import rlcompleter
+            readline.set_completer(
+                rlcompleter.Completer(self.locals).complete)
+            readline.parse_and_bind("tab: complete")
 
 
 def main():

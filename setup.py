@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import os
-from distutils.core import setup
+from setuptools import setup
 
 name = 'OdooRPC'
 version = '0.6.0'

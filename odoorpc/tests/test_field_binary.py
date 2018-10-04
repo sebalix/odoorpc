@@ -1,18 +1,20 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import base64
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 
 
-class TestFieldBinary(LoginTestCase):
+class TestFieldBinary(BaseTestCase):
 
     def test_field_binary_read(self):
-        img = self.user.image
+        odoo = self.get_session(login=True)
+        img = odoo.env.user.image
         base64.b64decode(img.encode('ascii'))
 
     def test_field_binary_write(self):
-        backup = self.user.image
+        odoo = self.get_session(login=True)
+        backup = odoo.env.user.image
         jpeg_file = (
             b"\xff\xd8\xff\xdb\x00\x43\x00\x03\x02\x02\x02\x02\x02\x03\x02\x02"
             b"\x02\x03\x03\x03\x03\x04\x06\x04\x04\x04\x04\x04\x08\x06\x06\x05"
@@ -23,16 +25,13 @@ class TestFieldBinary(LoginTestCase):
             b"\x01\x01\x00\x00\x3f\x00\xd2\xcf\x20\xff\xd9"
         )  # https://github.com/mathiasbynens/small/blob/master/jpeg.jpg
 
-        self.user.image = base64.b64encode(jpeg_file).decode('ascii')
-        data = self.user.read(['image'])[0]
+        odoo.env.user.image = base64.b64encode(jpeg_file).decode('ascii')
+        data = odoo.env.user.read(['image'])[0]
         decoded = base64.b64decode(data['image'].encode('ascii'))
         self.assertEqual(decoded, jpeg_file)
 
         # Restore original value
-        self.user.image = backup
-        data = self.user.read(['image'])[0]
+        odoo.env.user.image = backup
+        data = odoo.env.user.read(['image'])[0]
         self.assertEqual(data['image'], backup)
-        self.assertEqual(self.user.image, backup)
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+        self.assertEqual(odoo.env.user.image, backup)

@@ -1,43 +1,44 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import tempfile
 
-from odoorpc.tests import LoginTestCase
-from odoorpc import error
+from odoorpc.tests import BaseTestCase
 from odoorpc.tools import v
 
 
-class TestReport(LoginTestCase):
+class TestReport(BaseTestCase):
 
     def test_report_download_pdf(self):
+        odoo = self.get_session(login=True)
         model = 'res.company'
         report_name = 'web.preview_internalreport'
-        if v(self.odoo.version)[0] < 11:
+        if v(odoo.version)[0] < 11:
             report_name = 'preview.report'
-        ids = self.odoo.env[model].search([])[:20]
-        report = self.odoo.report.download(report_name, ids)
+        ids = odoo.env[model].search([])[:20]
+        report = odoo.report.download(report_name, ids)
         with tempfile.TemporaryFile(mode='wb', suffix='.pdf') as file_:
             file_.write(report.read())
 
     def test_report_download_qweb_pdf(self):
+        odoo = self.get_session(login=True)
         model = 'account.invoice'
         report_name = 'account.report_invoice'
-        ids = self.odoo.env[model].search([])[:10]
-        report = self.odoo.report.download(report_name, ids)
+        ids = odoo.env[model].search([])[:10]
+        report = odoo.report.download(report_name, ids)
         with tempfile.TemporaryFile(mode='wb', suffix='.pdf') as file_:
             file_.write(report.read())
 
     def test_report_download_wrong_report_name(self):
+        odoo = self.get_session(login=True)
         self.assertRaises(
             ValueError,
-            self.odoo.report.download, 'wrong_report', [1])
+            odoo.report.download, 'wrong_report', [1])
 
     def test_report_list(self):
-        res = self.odoo.report.list()
+        odoo = self.get_session(login=True)
+        res = odoo.report.list()
         self.assertIsInstance(res, dict)
         self.assertIn('account.invoice', res)
         self.assertTrue(
             any('account.report_invoice' in data['report_name']
                 for data in res['account.invoice']))
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

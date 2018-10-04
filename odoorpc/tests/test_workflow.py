@@ -1,18 +1,18 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
-
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 from odoorpc import error, tools
 
 
-class TestWorkflow(LoginTestCase):
+class TestWorkflow(BaseTestCase):
 
     def setUp(self):
-        LoginTestCase.setUp(self)
-        self.product_obj = self.odoo.env['product.product']
-        self.partner_obj = self.odoo.env['res.partner']
-        self.sale_order_obj = self.odoo.env['sale.order']
-        self.uom_obj = self.odoo.env['product.uom']
+        super(TestWorkflow, self).setUp()
+        odoo = self.get_session(login=True)
+        self.product_obj = odoo.env['product.product']
+        self.partner_obj = odoo.env['res.partner']
+        self.sale_order_obj = odoo.env['sale.order']
+        self.uom_obj = odoo.env['product.uom']
         self.p_id = self.partner_obj.create({'name': "Child 1"})
         prod_vals = {
             'name': "PRODUCT TEST WORKFLOW",
@@ -30,24 +30,24 @@ class TestWorkflow(LoginTestCase):
         self.so_id = self.sale_order_obj.create(so_vals)
 
     def test_exec_workflow(self):
-        if tools.v(self.odoo.version)[0] >= 11:
+        odoo = self.get_session(login=True)
+        if tools.v(odoo.version)[0] >= 11:
             self.assertRaises(
                 DeprecationWarning,
-                self.odoo.exec_workflow,
+                odoo.exec_workflow,
                 'sale.order', self.so_id, 'order_confirm')
             return
-        self.odoo.exec_workflow('sale.order', self.so_id, 'order_confirm')
+        odoo.exec_workflow('sale.order', self.so_id, 'order_confirm')
 
     def test_exec_workflow_wrong_model(self):
-        if tools.v(self.odoo.version)[0] >= 11:
+        odoo = self.get_session(login=True)
+        if tools.v(odoo.version)[0] >= 11:
             self.assertRaises(
                 DeprecationWarning,
-                self.odoo.exec_workflow,
+                odoo.exec_workflow,
                 'sale.order2', self.so_id, 'order_confirm')
             return
         self.assertRaises(
             error.RPCError,
-            self.odoo.exec_workflow,
+            odoo.exec_workflow,
             'sale.order2', self.so_id, 'order_confirm')
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

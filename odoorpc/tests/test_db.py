@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 from datetime import datetime
 import zipfile
@@ -9,128 +9,130 @@ import odoorpc
 
 class TestDB(BaseTestCase):
 
-    def setUp(self):
-        BaseTestCase.setUp(self)
-        self.odoo.logout()
-        self.databases = []     # Keep databases created during tests
-
     def test_db_dump(self):
-        dump = self.odoo.db.dump(self.env['super_pwd'], self.env['db'])
+        odoo = self.get_session()
+        dump = odoo.db.dump(self.env['super_pwd'], self.env['db'])
         self.assertIn('dump.sql', zipfile.ZipFile(dump).namelist())
 
     def test_db_dump_wrong_database(self):
+        odoo = self.get_session()
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.dump, self.env['super_pwd'], 'wrong_db')
+            odoo.db.dump, self.env['super_pwd'], 'wrong_db')
 
     def test_db_dump_wrong_password(self):
+        odoo = self.get_session()
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.dump, 'wrong_password', self.env['db'])
+            odoo.db.dump, 'wrong_password', self.env['db'])
 
     def test_db_create(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
-        self.odoo.db.create(self.env['super_pwd'], new_database)
+        odoo.db.create(self.env['super_pwd'], new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_create_existing_database(self):
+        odoo = self.get_session()
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.create, self.env['super_pwd'], self.env['db'])
+            odoo.db.create, self.env['super_pwd'], self.env['db'])
 
     def test_db_create_wrong_password(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.create, 'wrong_password', new_database)
+            odoo.db.create, 'wrong_password', new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_drop(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
-        self.odoo.db.duplicate(
+        odoo.db.duplicate(
             self.env['super_pwd'], self.env['db'], new_database)
-        res = self.odoo.db.drop(self.env['super_pwd'], new_database)
+        res = odoo.db.drop(self.env['super_pwd'], new_database)
         self.assertTrue(res)
+        self._drop_db(odoo, new_database)
 
     def test_db_drop_wrong_database(self):
-        res = self.odoo.db.drop(self.env['super_pwd'], 'wrong_database')
+        odoo = self.get_session()
+        res = odoo.db.drop(self.env['super_pwd'], 'wrong_database')
         self.assertFalse(res)
 
     def test_db_drop_wrong_password(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
-        self.odoo.db.duplicate(
+        odoo.db.duplicate(
             self.env['super_pwd'], self.env['db'], new_database)
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.drop, 'wrong_password', new_database)
+            odoo.db.drop, 'wrong_password', new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_duplicate(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
-        self.odoo.db.duplicate(
+        odoo.db.duplicate(
             self.env['super_pwd'], self.env['db'], new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_duplicate_wrong_database(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.duplicate,
+            odoo.db.duplicate,
             self.env['super_pwd'], 'wrong_database', new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_duplicate_wrong_password(self):
+        odoo = self.get_session()
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.duplicate,
+            odoo.db.duplicate,
             'wrong_password', self.env['db'], new_database)
+        self._drop_db(odoo, new_database)
 
     def test_db_list(self):
-        res = self.odoo.db.list()
+        odoo = self.get_session()
+        res = odoo.db.list()
         self.assertIsInstance(res, list)
         self.assertIn(self.env['db'], res)
 
     def test_db_restore_new_database(self):
-        dump = self.odoo.db.dump(self.env['super_pwd'], self.env['db'])
+        odoo = self.get_session()
+        dump = odoo.db.dump(self.env['super_pwd'], self.env['db'])
         date = datetime.strftime(datetime.today(), '%Y-%m-%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
-        self.odoo.db.restore(
+        odoo.db.restore(
             self.env['super_pwd'], new_database, dump)
+        self._drop_db(odoo, new_database)
 
     def test_db_restore_existing_database(self):
-        dump = self.odoo.db.dump(self.env['super_pwd'], self.env['db'])
+        odoo = self.get_session()
+        dump = odoo.db.dump(self.env['super_pwd'], self.env['db'])
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.restore,
+            odoo.db.restore,
             self.env['super_pwd'], self.env['db'], dump)
+        self._drop_db(odoo, self.env['db'])
 
     def test_db_restore_wrong_password(self):
-        dump = self.odoo.db.dump(self.env['super_pwd'], self.env['db'])
+        odoo = self.get_session()
+        dump = odoo.db.dump(self.env['super_pwd'], self.env['db'])
         date = datetime.strftime(datetime.today(), '%Y%m%d_%Hh%Mm%S')
         new_database = "%s_%s" % (self.env['db'], date)
-        self.databases.append(new_database)
         self.assertRaises(
             odoorpc.error.RPCError,
-            self.odoo.db.restore,
+            odoo.db.restore,
             'wrong_password', new_database, dump)
-
-    def tearDown(self):
-        """Clean up databases created during tests."""
-        for db in self.databases:
-            try:
-                self.odoo.db.drop(self.env['super_pwd'], db)
-            except:
-                pass
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+        self._drop_db(odoo, new_database)

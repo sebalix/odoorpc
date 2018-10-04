@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 from odoorpc.tests import BaseTestCase
 from odoorpc import tools
@@ -34,5 +34,3 @@ class TestTools(BaseTestCase):
                 self.assertTrue(result)
             else:
                 self.assertFalse(result)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

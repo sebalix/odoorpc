@@ -1,16 +1,18 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import time
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 from odoorpc.models import Model
 
 
-class TestFieldMany2many(LoginTestCase):
+class TestFieldMany2many(BaseTestCase):
 
     def setUp(self):
-        LoginTestCase.setUp(self)
-        self.group_obj = self.odoo.env['res.groups']
+        super(TestFieldMany2many, self).setUp()
+        odoo = self.get_session(login=True)
+        self.group_obj = odoo.env['res.groups']
+        self.user_obj = odoo.env['res.users']
         self.u0_id = self.user_obj.create({
             'name': "TestMany2many User 1",
             'login': 'test_m2m_u1_%s' % time.time(),
@@ -24,12 +26,13 @@ class TestFieldMany2many(LoginTestCase):
         })
 
     def test_field_many2many_read(self):
-        self.assertIsInstance(self.user.company_ids, Model)
-        self.assertEqual(self.user.company_ids._name, 'res.company')
+        odoo = self.get_session(login=True)
+        self.assertIsInstance(odoo.env.user.company_ids, Model)
+        self.assertEqual(odoo.env.user.company_ids._name, 'res.company')
         # Test if empty field returns an empty recordset, and not False
-        self.assertIsInstance(self.user.message_follower_ids, Model)
-        self.assertEqual(self.user.message_follower_ids.ids, [])
-        self.assertFalse(bool(self.user.message_follower_ids))
+        self.assertIsInstance(odoo.env.user.message_follower_ids, Model)
+        self.assertEqual(odoo.env.user.message_follower_ids.ids, [])
+        self.assertFalse(bool(odoo.env.user.message_follower_ids))
 
     def test_field_many2many_write_set_false(self):
         user = self.user_obj.browse(self.u0_id)
@@ -209,5 +212,3 @@ class TestFieldMany2many(LoginTestCase):
         group_ids = [grp.id for grp in user.groups_id]
         self.assertNotIn(groups.ids[0], group_ids)
         self.assertNotIn(groups.ids[1], group_ids)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

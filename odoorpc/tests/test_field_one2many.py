@@ -1,22 +1,24 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 from odoorpc.models import Model
 
 
-class TestFieldOne2many(LoginTestCase):
+class TestFieldOne2many(BaseTestCase):
 
     def setUp(self):
-        LoginTestCase.setUp(self)
-        self.partner_obj = self.odoo.env['res.partner']
+        super(TestFieldOne2many, self).setUp()
+        odoo = self.get_session(login=True)
+        self.partner_obj = odoo.env['res.partner']
         self.p0_id = self.partner_obj.create({'name': "Parent"})
         self.p1_id = self.partner_obj.create({'name': "Child 1"})
         self.p2_id = self.partner_obj.create({'name': "Child 2"})
 
     def test_field_one2many_read(self):
+        odoo = self.get_session(login=True)
         # Test if empty field returns an empty recordset, and not False
-        self.assertIsInstance(self.user.child_ids, Model)
-        self.assertEqual(self.user.child_ids.ids, [])
+        self.assertIsInstance(odoo.env.user.child_ids, Model)
+        self.assertEqual(odoo.env.user.child_ids.ids, [])
 
     def test_field_one2many_write_set_false(self):
         partner = self.partner_obj.browse(self.p0_id)
@@ -232,5 +234,3 @@ class TestFieldOne2many(LoginTestCase):
         partner_ids = [pt.id for pt in partner.child_ids]
         self.assertNotIn(self.p1_id, partner_ids)
         self.assertNotIn(self.p2_id, partner_ids)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

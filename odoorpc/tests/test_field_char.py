@@ -1,16 +1,18 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 
 
-class TestFieldChar(LoginTestCase):
+class TestFieldChar(BaseTestCase):
 
     def test_field_char_read(self):
-        self.assertEqual(self.user.login, self.env['user'])
+        odoo = self.get_session(login=True)
+        self.assertEqual(odoo.env.user.login, self.env['user'])
 
     def test_field_char_write(self):
+        odoo = self.get_session(login=True)
         # TODO: split in several unit tests
-        partner = self.user.partner_id
+        partner = odoo.env.user.partner_id
         backup = partner.street
         # "A street"
         partner.street = "A street"
@@ -32,5 +34,3 @@ class TestFieldChar(LoginTestCase):
         data = partner.read(['street'])[0]
         self.assertEqual(data['street'], backup)
         self.assertEqual(partner.street, backup)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,20 +1,21 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import tempfile
 import os
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 import odoorpc
 
 
-class TestSession(LoginTestCase):
+class TestSession(BaseTestCase):
 
     def setUp(self):
-        LoginTestCase.setUp(self)
+        super(TestSession, self).setUp()
         self.session_name = self.env['db']
         self.file_path = tempfile.mkstemp(suffix='.cfg', prefix='odoorpc_')[1]
 
     def tearDown(self):
+        super(TestSession, self).tearDown()
         os.remove(self.file_path)
 
     def test_session_odoo_list(self):
@@ -25,33 +26,36 @@ class TestSession(LoginTestCase):
         self.assertIsInstance(result, list)
 
     def test_session_odoo_save_and_remove(self):
-        self.odoo.save(self.session_name, rc_file=self.file_path)
+        odoo = self.get_session(login=True)
+        odoo.save(self.session_name, rc_file=self.file_path)
         result = odoorpc.ODOO.list(rc_file=self.file_path)
         self.assertIn(self.session_name, result)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
     def test_session_odoo_load(self):
-        self.odoo.save(self.session_name, rc_file=self.file_path)
+        odoo = self.get_session(login=True)
+        odoo.save(self.session_name, rc_file=self.file_path)
         odoo = odoorpc.ODOO.load(self.session_name, rc_file=self.file_path)
         self.assertIsInstance(odoo, odoorpc.ODOO)
-        self.assertEqual(self.odoo.host, odoo.host)
-        self.assertEqual(self.odoo.port, odoo.port)
-        self.assertEqual(self.odoo.protocol, odoo.protocol)
-        self.assertEqual(self.odoo.env.db, odoo.env.db)
-        self.assertEqual(self.odoo.env.uid, odoo.env.uid)
+        self.assertEqual(odoo.host, odoo.host)
+        self.assertEqual(odoo.port, odoo.port)
+        self.assertEqual(odoo.protocol, odoo.protocol)
+        self.assertEqual(odoo.env.db, odoo.env.db)
+        self.assertEqual(odoo.env.uid, odoo.env.uid)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
     def test_session_get(self):
-        self.odoo.save(self.session_name, rc_file=self.file_path)
+        odoo = self.get_session(login=True)
+        odoo.save(self.session_name, rc_file=self.file_path)
         data = {
-            'type': self.odoo.__class__.__name__,
-            'host': self.odoo.host,
-            'protocol': self.odoo.protocol,
-            'port': int(self.odoo.port),
-            'timeout': self.odoo.config['timeout'],
-            'user': self.odoo._login,
-            'passwd': self.odoo._password,
-            'database': self.odoo.env.db,
+            'type': odoo.__class__.__name__,
+            'host': odoo.host,
+            'protocol': odoo.protocol,
+            'port': int(odoo.port),
+            'timeout': odoo.config['timeout'],
+            'user': odoo._login,
+            'passwd': odoo._password,
+            'database': odoo.env.db,
         }
         result = odoorpc.session.get(
             self.session_name, rc_file=self.file_path)
@@ -59,22 +63,21 @@ class TestSession(LoginTestCase):
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
     def test_session_get_all(self):
-        self.odoo.save(self.session_name, rc_file=self.file_path)
+        odoo = self.get_session(login=True)
+        odoo.save(self.session_name, rc_file=self.file_path)
         data = {
             self.session_name: {
-                'type': self.odoo.__class__.__name__,
-                'host': self.odoo.host,
-                'protocol': self.odoo.protocol,
-                'port': int(self.odoo.port),
-                'timeout': self.odoo.config['timeout'],
-                'user': self.odoo._login,
-                'passwd': self.odoo._password,
-                'database': self.odoo.env.db,
+                'type': odoo.__class__.__name__,
+                'host': odoo.host,
+                'protocol': odoo.protocol,
+                'port': int(odoo.port),
+                'timeout': odoo.config['timeout'],
+                'user': odoo._login,
+                'passwd': odoo._password,
+                'database': odoo.env.db,
             }
         }
         result = odoorpc.session.get_all(rc_file=self.file_path)
         self.assertIn(self.session_name, result)
         self.assertEqual(data, result)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

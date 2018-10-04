@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 from odoorpc.tests import BaseTestCase
 
@@ -6,7 +6,8 @@ from odoorpc.tests import BaseTestCase
 class TestReqJSON(BaseTestCase):
 
     def _req_json(self, url):
-        data = self.odoo.json(
+        odoo = self.get_session(login=True)
+        data = odoo.json(
             url,
             {'db': self.env['db'],
              'login': self.env['user'],

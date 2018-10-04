@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 from odoorpc.tests import BaseTestCase
 import odoorpc
@@ -40,5 +40,3 @@ class TestLogin(BaseTestCase):
             port=self.env['port'], version=self.env['version'])
         success = odoo.logout()
         self.assertFalse(success)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

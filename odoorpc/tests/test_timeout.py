@@ -1,31 +1,31 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import socket
 
-from odoorpc.tests import LoginTestCase
+from odoorpc.tests import BaseTestCase
 from odoorpc.tools import v
 
 
-class TestTimeout(LoginTestCase):
+class TestTimeout(BaseTestCase):
 
     def test_increased_timeout(self):
+        odoo = self.get_session(login=True)
         # Set the timeout
-        self.odoo.config['timeout'] = 120
+        odoo.config['timeout'] = 120
         # Execute a time consuming query: no exception
         report_name = 'web.preview_internalreport'
-        if v(self.odoo.version)[0] < 11:
+        if v(odoo.version)[0] < 11:
             report_name = 'preview.report'
-        self.odoo.report.download(report_name, [1])
+        odoo.report.download(report_name, [1])
 
     def test_reduced_timeout(self):
+        odoo = self.get_session(login=True)
         # Set the timeout
-        self.odoo.config['timeout'] = 0.005
+        odoo.config['timeout'] = 0.005
         # Execute a time consuming query: handle exception
         report_name = 'web.preview_internalreport'
-        if v(self.odoo.version)[0] < 11:
+        if v(odoo.version)[0] < 11:
             report_name = 'preview.report'
         self.assertRaises(
             socket.timeout,
-            self.odoo.report.download, report_name, [1])
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+            odoo.report.download, report_name, [1])

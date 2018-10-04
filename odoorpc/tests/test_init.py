@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import sys
 # Python 2
@@ -80,5 +80,3 @@ class TestInit(BaseTestCase):
             ValueError,
             odoorpc.ODOO,
             self.env['host'], self.env['protocol'], self.env['port'], "wrong")
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

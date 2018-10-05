@@ -2,7 +2,7 @@
 
 import sys
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 # Python 2
 if sys.version_info.major < 3:
@@ -16,8 +16,8 @@ else:
 
 class TestFieldText(BaseTestCase):
 
-    def test_field_text_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_text_read(self, odoo):
         # Test empty field
         self.assertFalse(odoo.env.user.comment)
         # Test field containing a value
@@ -26,6 +26,7 @@ class TestFieldText(BaseTestCase):
         sale_mod = Module.browse(sale_id)
         self.assertTrue(is_string(sale_mod.views_by_module))
 
-    def test_field_text_write(self):
+    @session(login=True)
+    def test_field_text_write(self, odoo):
         # TODO
         pass

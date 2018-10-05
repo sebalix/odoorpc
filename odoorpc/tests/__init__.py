@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from functools import wraps
 try:
     import unittest2 as unittest
 except ImportError:
@@ -8,64 +9,69 @@ import os
 
 import odoorpc
 
+try:
+    port = int(os.environ.get('ORPC_TEST_PORT', 8069))
+except ValueError:
+    raise ValueError("The port must be an integer")
+ENV = {
+    'protocol': os.environ.get('ORPC_TEST_PROTOCOL', 'jsonrpc'),
+    'host': os.environ.get('ORPC_TEST_HOST', 'localhost'),
+    'port': port,
+    'db': os.environ.get('ORPC_TEST_DB', 'odoorpc_test'),
+    'user': os.environ.get('ORPC_TEST_USER', 'admin'),
+    'pwd': os.environ.get('ORPC_TEST_PWD', 'admin'),
+    'version': os.environ.get('ORPC_TEST_VERSION', None),
+    'super_pwd': os.environ.get('ORPC_TEST_SUPER_PWD', 'admin'),
+}
+
 
 class BaseTestCase(unittest.TestCase):
-    """Instanciates an ``odoorpc.ODOO`` object, nothing more."""
-    def __new__(cls, *args, **kwargs):
-        try:
-            port = int(os.environ.get('ORPC_TEST_PORT', 8069))
-        except ValueError:
-            raise ValueError("The port must be an integer")
-        cls.env = {
-            'protocol': os.environ.get('ORPC_TEST_PROTOCOL', 'jsonrpc'),
-            'host': os.environ.get('ORPC_TEST_HOST', 'localhost'),
-            'port': port,
-            'db': os.environ.get('ORPC_TEST_DB', 'odoorpc_test'),
-            'user': os.environ.get('ORPC_TEST_USER', 'admin'),
-            'pwd': os.environ.get('ORPC_TEST_PWD', 'admin'),
-            'version': os.environ.get('ORPC_TEST_VERSION', None),
-            'super_pwd': os.environ.get('ORPC_TEST_SUPER_PWD', 'admin'),
-        }
-        super_new = super(BaseTestCase, cls).__new__
-        if super_new is object.__new__:
-            return super_new(cls)
-        return super_new(cls, *args, **kwargs)
+    """Base class to implement tests. It will create automatically
+    an Odoo database and install some modules in order to perform
+    integration tests.
+    """
+    db_created = False
+    modules_installed = False
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
-        odoo = self.get_session()
-        self._create_db(odoo, self.env['db'])
-        odoo = self.get_session(login=True)
-        self._install_modules(odoo)
+        self.env = dict(ENV)
 
     @classmethod
     def get_session(cls, login=False):
         odoo = odoorpc.ODOO(
-            cls.env['host'], protocol=cls.env['protocol'],
-            port=cls.env['port'], version=cls.env['version'])
+            ENV['host'], protocol=ENV['protocol'],
+            port=ENV['port'], version=ENV['version'])
         if login:
-            odoo.login(cls.env['db'], cls.env['user'], cls.env['pwd'])
+            odoo.login(ENV['db'], ENV['user'], ENV['pwd'])
         return odoo
 
     @classmethod
-    def _create_db(cls, odoo, dbname):
+    def _create_db(cls, dbname):
         """Create the database `dbname` if it does not exist."""
+        if cls.db_created:
+            return
+        odoo = cls.get_session()
         default_timeout = odoo.config['timeout']
         odoo.config['timeout'] = 600
         if dbname not in odoo.db.list():
-            odoo.db.create(cls.env['super_pwd'], dbname, True)
+            odoo.db.create(ENV['super_pwd'], dbname, True)
         odoo.config['timeout'] = default_timeout
+        cls.db_created = True
 
     @classmethod
     def _drop_db(cls, odoo, dbname):
         """Drop the database `dbname`."""
         try:
-            odoo.db.drop(cls.env['super_pwd'], dbname)
+            odoo.db.drop(ENV['super_pwd'], dbname)
         except:     # pylint: disable=bare-except,except-pass
             pass
 
     @classmethod
-    def _install_modules(cls, odoo):
+    def _install_modules(cls):
+        if cls.modules_installed:
+            return
+        odoo = cls.get_session(login=True)
         default_timeout = odoo.config['timeout']
         # Install 'sale' + 'crm_claim' on Odoo < 10.0,
         # and 'sale' + 'subscription' on Odoo >= 10.0
@@ -81,8 +87,17 @@ class BaseTestCase(unittest.TestCase):
         if module_ids:
             module_obj.button_immediate_install(module_ids)
         odoo.config['timeout'] = default_timeout
-        # Get user record and model after the installation of modules
-        # to get all available fields (avoiding test failures)
-        # FIXME: is it still relevant?
-        # user = odoo.env.user
-        # user_obj = odoo.env['res.users']
+        cls.modules_installed = True
+
+
+def session(login=False):
+    def decorated(func):
+        BaseTestCase._create_db(ENV['db'])
+        BaseTestCase._install_modules()
+        odoo = BaseTestCase.get_session(login)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            kwargs['odoo'] = odoo
+            return func(*args, **kwargs)
+        return wrapper
+    return decorated

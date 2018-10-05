@@ -3,7 +3,7 @@
 import tempfile
 import os
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 import odoorpc
 
 
@@ -25,15 +25,15 @@ class TestSession(BaseTestCase):
         result = odoorpc.ODOO.list(rc_file=other_file_path)
         self.assertIsInstance(result, list)
 
-    def test_session_odoo_save_and_remove(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_session_odoo_save_and_remove(self, odoo):
         odoo.save(self.session_name, rc_file=self.file_path)
         result = odoorpc.ODOO.list(rc_file=self.file_path)
         self.assertIn(self.session_name, result)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
-    def test_session_odoo_load(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_session_odoo_load(self, odoo):
         odoo.save(self.session_name, rc_file=self.file_path)
         odoo = odoorpc.ODOO.load(self.session_name, rc_file=self.file_path)
         self.assertIsInstance(odoo, odoorpc.ODOO)
@@ -44,8 +44,8 @@ class TestSession(BaseTestCase):
         self.assertEqual(odoo.env.uid, odoo.env.uid)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
-    def test_session_get(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_session_get(self, odoo):
         odoo.save(self.session_name, rc_file=self.file_path)
         data = {
             'type': odoo.__class__.__name__,
@@ -62,8 +62,8 @@ class TestSession(BaseTestCase):
         self.assertEqual(data, result)
         odoorpc.ODOO.remove(self.session_name, rc_file=self.file_path)
 
-    def test_session_get_all(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_session_get_all(self, odoo):
         odoo.save(self.session_name, rc_file=self.file_path)
         data = {
             self.session_name: {

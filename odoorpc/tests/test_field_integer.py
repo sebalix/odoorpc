@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldInteger(BaseTestCase):
 
-    def test_field_integer_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_integer_read(self, odoo):
         self.assertIsInstance(odoo.env.user.id, int)
 
-    def test_field_integer_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_integer_write(self, odoo):
         cron_obj = odoo.env['ir.cron']
         cron = cron_obj.browse(cron_obj.search([])[0])
         backup = cron.priority

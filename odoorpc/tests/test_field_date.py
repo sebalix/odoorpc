@@ -2,17 +2,17 @@
 
 import datetime
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldDate(BaseTestCase):
 
-    def test_field_date_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_date_read(self, odoo):
         self.assertIsInstance(odoo.env.user.login_date, datetime.date)
 
-    def test_field_date_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_date_write(self, odoo):
         partner = odoo.env.user.company_id.partner_id
         backup = partner.date
         # False

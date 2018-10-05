@@ -2,18 +2,18 @@
 
 import base64
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldBinary(BaseTestCase):
 
-    def test_field_binary_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_binary_read(self, odoo):
         img = odoo.env.user.image
         base64.b64decode(img.encode('ascii'))
 
-    def test_field_binary_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_binary_write(self, odoo):
         backup = odoo.env.user.image
         jpeg_file = (
             b"\xff\xd8\xff\xdb\x00\x43\x00\x03\x02\x02\x02\x02\x02\x03\x02\x02"

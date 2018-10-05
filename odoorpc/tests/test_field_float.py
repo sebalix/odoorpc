@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldFloat(BaseTestCase):
 
-    def test_field_float_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_float_read(self, odoo):
         self.assertEqual(odoo.env.user.credit_limit, 0.0)
 
-    def test_field_float_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_float_write(self, odoo):
         # TODO: split in several unit tests
         partner = odoo.env.user.partner_id
         backup = partner.credit_limit

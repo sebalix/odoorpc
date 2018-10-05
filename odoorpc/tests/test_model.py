@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import time
-
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 from odoorpc import error
 from odoorpc.models import Model
 from odoorpc.env import Environment
@@ -10,72 +8,67 @@ from odoorpc.env import Environment
 
 class TestModel(BaseTestCase):
 
-    def setUp(self):
-        super(TestModel, self).setUp()
-        odoo = self.get_session(login=True)
-        self.partner_obj = odoo.env['res.partner']
-        self.p0_id = self.partner_obj.create({'name': "Parent"})
-        self.p1_id = self.partner_obj.create({'name': "Child 1"})
-        self.p2_id = self.partner_obj.create({'name': "Child 2"})
-        self.group_obj = odoo.env['res.groups']
-        self.u0_id = odoo.env['res.users'].create(
-            {'name': "TestOdooRPC", 'login': 'test_%s' % time.time()})
-        self.g1_id = self.group_obj.create({'name': "Group 1"})
-        self.g2_id = self.group_obj.create({'name': "Group 2"})
+    @session(login=True)
+    def test_create_model_class(self, odoo):
+        partner_model = odoo.env['res.partner']
+        self.assertEqual(partner_model._name, 'res.partner')
+        self.assertIn('name', partner_model._columns)
+        self.assertIsInstance(partner_model.env, Environment)
 
-    def test_create_model_class(self):
-        odoo = self.get_session(login=True)
-        partner_obj = odoo.env['res.partner']
-        self.assertEqual(partner_obj._name, 'res.partner')
-        self.assertIn('name', partner_obj._columns)
-        self.assertIsInstance(partner_obj.env, Environment)
-
-    def test_model_browse(self):
-        partner = self.partner_obj.browse(1)
+    @session(login=True)
+    def test_model_browse(self, odoo):
+        partner_model = odoo.env['res.partner']
+        partner = partner_model.browse(1)
         self.assertIsInstance(partner, Model)
         self.assertEqual(partner.id, 1)
         self.assertEqual(partner.ids, [1])
-        self.assertEqual(partner.env, self.partner_obj.env)
-        partners = self.partner_obj.browse([1])
+        self.assertEqual(partner.env, partner_model.env)
+        partners = partner_model.browse([1])
         self.assertIsInstance(partners, Model)
         self.assertEqual(partners.id, 1)
         self.assertEqual(partners.ids, [1])
-        self.assertEqual(partners.env, self.partner_obj.env)
+        self.assertEqual(partners.env, partner_model.env)
         self.assertEqual(partners.ids, partner.ids)
 
-    def test_model_browse_false(self):
-        partner = self.partner_obj.browse(False)
+    @session(login=True)
+    def test_model_browse_false(self, odoo):
+        partner_model = odoo.env['res.partner']
+        partner = partner_model.browse(False)
         self.assertEqual(len(partner), 0)
 
-    def test_model_browse_wrong_id(self):
+    @session(login=True)
+    def test_model_browse_wrong_id(self, odoo):
+        partner_model = odoo.env['res.partner']
         self.assertRaises(
             ValueError,
-            self.partner_obj.browse,
+            partner_model.browse,
             9999999)    # Wrong ID
         self.assertRaises(
             error.RPCError,
-            self.partner_obj.browse,
+            partner_model.browse,
             "1")  # Wrong ID type
 
-    def test_model_browse_without_arg(self):
-        self.assertRaises(TypeError, self.partner_obj.browse)
+    @session(login=True)
+    def test_model_browse_without_arg(self, odoo):
+        partner_model = odoo.env['res.partner']
+        self.assertRaises(TypeError, partner_model.browse)
 
-    def test_model_rpc_method(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_model_rpc_method(self, odoo):
         user_obj = odoo.env['res.users']
         user_obj.name_get(odoo.env.uid)
         odoo.env['ir.sequence'].get('fake.code')  # Return False
 
-    def test_model_rpc_method_error_no_arg(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_model_rpc_method_error_no_arg(self, odoo):
         # Handle exception (execute a 'name_get' with without args)
         user_obj = odoo.env['res.users']
         self.assertRaises(
             error.RPCError,
             user_obj.name_get)  # No arg
 
-    def test_model_rpc_method_error_wrong_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_model_rpc_method_error_wrong_args(self, odoo):
         # Handle exception (execute a 'search' with wrong args)
         user_obj = odoo.env['res.users']
         self.assertRaises(
@@ -83,29 +76,37 @@ class TestModel(BaseTestCase):
             user_obj.search,
             False)  # Wrong arg
 
-    def test_record_getitem_field(self):
-        partner = self.partner_obj.browse(1)
+    @session(login=True)
+    def test_record_getitem_field(self, odoo):
+        partner_model = odoo.env['res.partner']
+        partner = partner_model.browse(1)
         self.assertEqual(partner['id'], 1)
         self.assertEqual(partner['name'], partner.name)
 
-    def test_record_getitem_integer(self):
-        partner = self.partner_obj.browse(1)
+    @session(login=True)
+    def test_record_getitem_integer(self, odoo):
+        partner_model = odoo.env['res.partner']
+        partner = partner_model.browse(1)
         self.assertEqual(partner[0], partner)
 
-    def test_record_getitem_slice(self):
-        partner = self.partner_obj.browse(1)
+    @session(login=True)
+    def test_record_getitem_slice(self, odoo):
+        partner_model = odoo.env['res.partner']
+        partner = partner_model.browse(1)
         self.assertEqual([record.id for record in partner[:]], [1])
 
-    def test_record_iter(self):
-        ids = self.partner_obj.search([])[:5]
-        partners = self.partner_obj.browse(ids)
+    @session(login=True)
+    def test_record_iter(self, odoo):
+        partner_model = odoo.env['res.partner']
+        ids = partner_model.search([])[:5]
+        partners = partner_model.browse(ids)
         self.assertEqual(set([partner.id for partner in partners]), set(ids))
         partner = partners[0]
         self.assertIn(partner.id, partners.ids)
         self.assertEqual(id(partner._values), id(partners._values))
 
-    def test_record_with_context(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_record_with_context(self, odoo):
         user = odoo.env.user
         self.assertEqual(user.env.lang, 'en_US')
         user_fr = user.with_context(lang='fr_FR')

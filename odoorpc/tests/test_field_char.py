@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldChar(BaseTestCase):
 
-    def test_field_char_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_char_read(self, odoo):
         self.assertEqual(odoo.env.user.login, self.env['user'])
 
-    def test_field_char_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_char_write(self, odoo):
         # TODO: split in several unit tests
         partner = odoo.env.user.partner_id
         backup = partner.street

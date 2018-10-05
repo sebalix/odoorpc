@@ -2,14 +2,14 @@
 
 import socket
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 from odoorpc.tools import v
 
 
 class TestTimeout(BaseTestCase):
 
-    def test_increased_timeout(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_increased_timeout(self, odoo):
         # Set the timeout
         odoo.config['timeout'] = 120
         # Execute a time consuming query: no exception
@@ -18,8 +18,8 @@ class TestTimeout(BaseTestCase):
             report_name = 'preview.report'
         odoo.report.download(report_name, [1])
 
-    def test_reduced_timeout(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_reduced_timeout(self, odoo):
         # Set the timeout
         odoo.config['timeout'] = 0.005
         # Execute a time consuming query: handle exception

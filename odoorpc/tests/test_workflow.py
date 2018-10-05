@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 from odoorpc import error, tools
 
 
@@ -29,8 +29,8 @@ class TestWorkflow(BaseTestCase):
         }
         self.so_id = self.sale_order_obj.create(so_vals)
 
-    def test_exec_workflow(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_exec_workflow(self, odoo):
         if tools.v(odoo.version)[0] >= 11:
             self.assertRaises(
                 DeprecationWarning,
@@ -39,8 +39,8 @@ class TestWorkflow(BaseTestCase):
             return
         odoo.exec_workflow('sale.order', self.so_id, 'order_confirm')
 
-    def test_exec_workflow_wrong_model(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_exec_workflow_wrong_model(self, odoo):
         if tools.v(odoo.version)[0] >= 11:
             self.assertRaises(
                 DeprecationWarning,

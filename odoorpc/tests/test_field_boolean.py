@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldBoolean(BaseTestCase):
 
-    def test_field_boolean_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_boolean_read(self, odoo):
         self.assertTrue(odoo.env.user.active)
 
-    def test_field_boolean_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_boolean_write(self, odoo):
         # TODO: split in several unit tests
         partner = odoo.env.user.partner_id
         backup = partner.customer

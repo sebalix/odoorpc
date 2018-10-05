@@ -3,7 +3,7 @@
 import numbers
 import time
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 import odoorpc
 
 
@@ -12,8 +12,8 @@ class TestExecute(BaseTestCase):
     # ------
     # Search
     # ------
-    def test_execute_search_with_good_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_search_with_good_args(self, odoo):
         # Check the result returned
         result = odoo.execute('res.users', 'search', [])
         self.assertIsInstance(result, list)
@@ -23,8 +23,8 @@ class TestExecute(BaseTestCase):
         self.assertIn(odoo.env.user.id, result)
         self.assertEqual(result[0], odoo.env.user.id)
 
-    def test_execute_search_without_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_search_without_args(self, odoo):
         # Handle exception (execute a 'search' without args)
         self.assertRaises(
             odoorpc.error.RPCError,
@@ -32,8 +32,8 @@ class TestExecute(BaseTestCase):
             'res.users',
             'search')
 
-    def test_execute_search_with_wrong_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_search_with_wrong_args(self, odoo):
         # Handle exception (execute a 'search' with wrong args)
         self.assertRaises(
             odoorpc.error.RPCError,
@@ -42,8 +42,8 @@ class TestExecute(BaseTestCase):
             'search',
             False)  # Wrong arg
 
-    def test_execute_search_with_wrong_model(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_search_with_wrong_model(self, odoo):
         # Handle exception (execute a 'search' with a wrong model)
         self.assertRaises(
             odoorpc.error.RPCError,
@@ -52,8 +52,8 @@ class TestExecute(BaseTestCase):
             'search',
             [])
 
-    def test_execute_search_with_wrong_method(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_search_with_wrong_method(self, odoo):
         # Handle exception (execute a 'search' with a wrong method)
         self.assertRaises(
             odoorpc.error.RPCError,
@@ -65,8 +65,8 @@ class TestExecute(BaseTestCase):
     # ------
     # Create
     # ------
-    def test_execute_create_with_good_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_create_with_good_args(self, odoo):
         login = "%s_%s" % ("foobar", time.time())
         # Check the result returned
         result = odoo.execute(
@@ -81,8 +81,8 @@ class TestExecute(BaseTestCase):
             'res.users', 'create',
             {'name': login, 'login': login})
 
-    def test_execute_create_without_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_create_without_args(self, odoo):
         # Handle exception (execute a 'create' without args)
         self.assertRaises(
             odoorpc.error.RPCError,
@@ -90,8 +90,8 @@ class TestExecute(BaseTestCase):
             'res.users',
             'create')
 
-    def test_execute_create_with_wrong_args(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_execute_create_with_wrong_args(self, odoo):
         # Handle exception (execute a 'create' with wrong args)
         self.assertRaises(
             odoorpc.error.RPCError,

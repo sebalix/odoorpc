@@ -2,13 +2,13 @@
 
 import datetime
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldDatetime(BaseTestCase):
 
-    def test_field_datetime_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_datetime_read(self, odoo):
         SaleOrder = odoo.env['sale.order']
         order_id = SaleOrder.search([('date_order', '!=', False)], limit=1)
         order = SaleOrder.browse(order_id)

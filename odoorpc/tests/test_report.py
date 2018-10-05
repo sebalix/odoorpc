@@ -2,14 +2,14 @@
 
 import tempfile
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 from odoorpc.tools import v
 
 
 class TestReport(BaseTestCase):
 
-    def test_report_download_pdf(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_report_download_pdf(self, odoo):
         model = 'res.company'
         report_name = 'web.preview_internalreport'
         if v(odoo.version)[0] < 11:
@@ -19,7 +19,8 @@ class TestReport(BaseTestCase):
         with tempfile.TemporaryFile(mode='wb', suffix='.pdf') as file_:
             file_.write(report.read())
 
-    def test_report_download_qweb_pdf(self):
+    @session(login=True)
+    def test_report_download_qweb_pdf(self, odoo):
         odoo = self.get_session(login=True)
         model = 'account.invoice'
         report_name = 'account.report_invoice'
@@ -28,13 +29,15 @@ class TestReport(BaseTestCase):
         with tempfile.TemporaryFile(mode='wb', suffix='.pdf') as file_:
             file_.write(report.read())
 
-    def test_report_download_wrong_report_name(self):
+    @session(login=True)
+    def test_report_download_wrong_report_name(self, odoo):
         odoo = self.get_session(login=True)
         self.assertRaises(
             ValueError,
             odoo.report.download, 'wrong_report', [1])
 
-    def test_report_list(self):
+    @session(login=True)
+    def test_report_list(self, odoo):
         odoo = self.get_session(login=True)
         res = odoo.report.list()
         self.assertIsInstance(res, dict)

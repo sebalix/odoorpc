@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from odoorpc.tests import BaseTestCase
+from odoorpc.tests import BaseTestCase, session
 
 
 class TestFieldSelection(BaseTestCase):
 
-    def test_field_selection_read(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_selection_read(self, odoo):
         self.assertEqual(odoo.env.user.state, 'active')
 
-    def test_field_selection_write(self):
-        odoo = self.get_session(login=True)
+    @session(login=True)
+    def test_field_selection_write(self, odoo):
         # TODO: split in several unit tests
         #record = odoo.env.user
         #data = record.__class__.fields_get()

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 import os
 import setuptools
 
@@ -63,6 +62,7 @@ setuptools.setup(name=name,
           "Programming Language :: Python :: 3.4",
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: Implementation :: CPython",
           "Programming Language :: Python :: Implementation :: PyPy",
           "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
@@ -70,5 +70,3 @@ setuptools.setup(name=name,
           "Framework :: Odoo",
       ],
       )
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

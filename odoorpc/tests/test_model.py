@@ -10,17 +10,10 @@ from odoorpc.env import Environment
 
 class TestModel(LoginTestCase):
 
-    def setUp(self):
-        LoginTestCase.setUp(self)
-        self.partner_obj = self.odoo.env['res.partner']
-        self.p0_id = self.partner_obj.create({'name': "Parent"})
-        self.p1_id = self.partner_obj.create({'name': "Child 1"})
-        self.p2_id = self.partner_obj.create({'name': "Child 2"})
-        self.group_obj = self.odoo.env['res.groups']
-        self.u0_id = self.user_obj.create(
-            {'name': "TestOdooRPC", 'login': 'test_%s' % time.time()})
-        self.g1_id = self.group_obj.create({'name': "Group 1"})
-        self.g2_id = self.group_obj.create({'name': "Group 2"})
+    @classmethod
+    def setUpClass(cls):
+        super(TestModel, cls).setUpClass()
+        cls.partner_obj = cls.odoo.env['res.partner']
 
     def test_create_model_class(self):
         partner_obj = self.odoo.env['res.partner']

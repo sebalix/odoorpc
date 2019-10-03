@@ -15,13 +15,13 @@
 #   - docker.io
 #   - python3-venv
 # Optional environment variables:
-#   - ORPC_TEST_VERSION=12.0
+#   - ORPC_TEST_VERSION=13.0
 #   - ORPC_TEST_PORT=8069
 #   - ORPC_TEST_DB
 #
 HERE=$(dirname $(readlink -m $0))
 VENV=$HERE/venv_test
-[ -z ${ORPC_TEST_VERSION+x} ] && export ORPC_TEST_VERSION="12.0"
+[ -z ${ORPC_TEST_VERSION+x} ] && export ORPC_TEST_VERSION="13.0"
 [ -z ${ORPC_TEST_PORT+x} ] && export ORPC_TEST_PORT=8069
 
 # Pull images
